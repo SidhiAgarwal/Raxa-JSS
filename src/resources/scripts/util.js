@@ -233,10 +233,10 @@ var Util = {
         
     },
 
-      /**
-       *Return selected module in Raxa and by changing the module text font .
-       *@return [ 'LOGIN', 'SCREENER', ....]
-       */
+    /**
+     *Return selected module in Raxa and by changing the module text font .
+     *@return [ 'LOGIN', 'SCREENER', ....]
+     */
     getSelectModules: function () {
         var moduleElements=[];
         for (var i = 0; i < Util.getModules().length ; i++) {
@@ -321,18 +321,31 @@ var Util = {
      */
     getPatientIdentifier: function () {
         //TODO: add this back in once ID Gen is working properly
-        //https://raxaemr.atlassian.net/browse/JLM-45 (is accidentally a JLM issue)
-        //        var patientIDRequest = new XMLHttpRequest();
-        //        patientIDRequest.open("GET", HOST + '/module/idgen/generateIdentifier.form?source=1&comment=New%20Patient', false);
-        //        patientIDRequest.setRequestHeader("Accept", "*/*");
-        //        patientIDRequest.send();
-        //        if (patientIDRequest.status = "200") {
-        //            var pid = patientIDRequest.responseText;
-        //            return pid;
-        //        } else {
-        //            console.log('ERROR Code on creating patient identifier: ' + patientIDRequest.status);
-        //        }
-        return (Math.floor(Math.random()*1000000)).toString();
+        var user = "admin";
+        var pass = "Hello123";
+        var generatedId = (Math.floor(Math.random()*1000000)).toString();
+        url = HOST + '/ws/rest/v1/patient?q='+generatedId,
+        // url = HOST + '/ws/rest/v1/patient?q=208579', //+generatedId,
+        xmlHttp = new XMLHttpRequest(); 
+        xmlHttp.open( "GET", url , false );
+        xmlHttp.setRequestHeader("Accept", "application/json");
+        xmlHttp.setRequestHeader("Authorization", "Basic " + window.btoa(user + ":" + pass));
+        xmlHttp.send();
+        console.log("URL"+url);
+        console.log("ID"+generatedId);
+        console.log(xmlHttp);
+        var jsonData = JSON.parse(xmlHttp.responseText);
+        console.log(jsonData.results);
+        console.log(jsonData.results.length);
+        if (xmlHttp.status == "200") {
+            if(jsonData.results.length > 0) {
+                Util.getPatientIdentifier();
+            } else {
+                console.log(generatedId);
+                return generatedId;
+            }
+              
+        }
     },
 
     //Function to help share Models between ExtJS and Sencha Touch 2
@@ -441,8 +454,8 @@ var Util = {
     },
     
     /**
-     * Returns the uuid of the logged in provider
-     */
+         * Returns the uuid of the logged in provider
+         */
     getLoggedInProviderUuid: function(){
         if(!localStorage.getItem("loggedInUser"))
             return "provider is not logged in";
@@ -453,10 +466,10 @@ var Util = {
     },
     
     /**
-     * Runs before each module. Checks whether user has the privilege to view a specific module
-     * If not, redirects to login page.
-     * If so, returns true.
-     */
+         * Runs before each module. Checks whether user has the privilege to view a specific module
+         * If not, redirects to login page.
+         * If so, returns true.
+         */
     checkModulePrivilege: function(module){
         var privileges = localStorage.getItem("privileges");
         if(privileges!== null && (privileges.indexOf('RaxaEmrView '+module)!==-1 || privileges.indexOf('all privileges')!==-1)){
